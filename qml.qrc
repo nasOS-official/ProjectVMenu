@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/">
+        <file>RightPanel.qml</file>
+        <file>Main.qml</file>
+        <file>resources/shop.svg</file>
+        <file>resources/settings.svg</file>
+        <file>resources/power.svg</file>
+        <file>resources/news.svg</file>
+        <file>resources/games.svg</file>
+        <file>resources/devices.svg</file>
+        <file>TabSideButton.qml</file>
+        <file>Home.qml</file>
+        <file>Shop.qml</file>
+        <file>News.qml</file>
+        <file>Devices.qml</file>
+        <file>Settings.qml</file>
+        <file>themes/qmldir</file>
+        <file>themes/Theme.qml</file>
+    </qresource>
+</RCC>
