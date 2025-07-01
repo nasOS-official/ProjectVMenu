@@ -16,5 +16,9 @@
         <file>Settings.qml</file>
         <file>themes/qmldir</file>
         <file>themes/Theme.qml</file>
+        <file>NewsModel.qml</file>
+        <file>Dialog.qml</file>
+        <file>AskDialog.qml</file>
+        <file>RoundedButton.qml</file>
     </qresource>
 </RCC>

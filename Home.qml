@@ -1,4 +1,4 @@
-import QtQuick 2.12
+import QtQuick
 
 Item {
 
@@ -14,5 +14,9 @@ Item {
                color: "white"
             }
         }
+    }
+    Dialog{
+        onClicked: { this.destroy() }
+        text: "Hello!"
     }
 }

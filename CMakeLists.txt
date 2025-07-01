@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(QML_IMPORT_PATH ${PROJECT_SOURCE_DIR})
-find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core Quick)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Quick LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick LinguistTools)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules (JEMALLOC jemalloc)
 
@@ -33,10 +33,12 @@ pkg_check_modules (LIBCURL libcurl)
 pkg_search_module(LIBCURL REQUIRED libcurl)
 include_directories(${LIBCURL_INCLUDE_DIRS})
 
+set(TS_FILES ProjectVMenu_en_US.ts ProjectVMenu_ru_RU.ts)
 
 set(PROJECT_SOURCES
         main.cpp
         qml.qrc
+        ${TS_FILES}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -48,6 +50,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 #    set_property(TARGET ProjectVMenu APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+    # qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+    qt_add_translations(ProjectVMenu TS_FILES ${TS_FILES})
 else()
     if(ANDROID)
         add_library(ProjectVMenu SHARED
@@ -61,7 +65,9 @@ else()
           imageparser.h
         )
     endif()
-endif()
+
+    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+endif   ()
 
 target_link_libraries(ProjectVMenu
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick ${JEMALLOC_LIBRARIES} ${LIBXML_LIBRARIES} ${LIBCURL_LIBRARIES})

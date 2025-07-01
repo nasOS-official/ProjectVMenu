@@ -1,25 +1,19 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Controls
 import "themes"
 
-Item {
+RoundButton {
     id: root
     property alias size: root.width
     property int iconSize: 30
-    property alias iconSource: button.icon.source
-    signal clicked
+    property alias iconSource: root.icon.source
 
     height: width
-    RoundButton {
-        id: button
-        anchors.fill: parent
-        icon.width: iconSize
-        icon.height: iconSize
-        icon.color: Theme.text
-        palette.button: Theme.button
-
-        onClicked: {
-            root.clicked();
-        }
+    background: Rectangle {
+        color: root.pressed ? Theme.buttonPressed : root.hovered ? Theme.buttonHovered : Theme.button
+        radius: height / 2
     }
+    icon.width: iconSize
+    icon.height: iconSize
+    icon.color: Theme.text
 }
