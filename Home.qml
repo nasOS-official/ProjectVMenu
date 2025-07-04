@@ -15,8 +15,8 @@ Item {
             }
         }
     }
-    Dialog{
-        onClicked: { this.destroy() }
-        text: "Hello!"
+    GameDelegate {
+        image: "https://supertuxkart.net/assets/images/header.jpg"
+        label: "SuperTuxCart"
     }
 }

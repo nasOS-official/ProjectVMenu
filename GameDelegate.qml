@@ -2,13 +2,12 @@ import QtQuick
 import "themes"
 
 Item {
-    id: item1
     property alias image: _image.source
     property alias label: _text.text
-    property string link: ""
+    property string executable: ""
 
     width: scaleFactor * 275
-    height: scaleFactor * 178
+    height: scaleFactor * 275
     activeFocusOnTab: true
     focus: true
 
@@ -20,6 +19,7 @@ Item {
     Image {
         id: _image
         anchors.fill: parent
+        fillMode: Image.PreserveAspectCrop
     }
     Item{
         id: item2

@@ -4,9 +4,12 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Item {
+    id: root
     width: 800 * scaleFactor
     height: 300 * scaleFactor
     property alias text: _text.text
+    signal accepted
+    signal canceled
 
     Rectangle {
         id: rectangle
@@ -44,7 +47,7 @@ Item {
         anchors.bottomMargin: 8 * scaleFactor
         spacing: 8 * scaleFactor
 
-        RoundButton {
+        RoundedButton {
             id: roundButton
             text: qsTr("Ok")
             font.pixelSize: 24 * scaleFactor
@@ -52,9 +55,10 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignHCenter
+            onClicked: root.accepted()
         }
 
-        RoundButton {
+        RoundedButton {
             id: roundButton1
             text: qsTr("Cancel")
             font.pixelSize: 24 * scaleFactor
@@ -62,6 +66,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignHCenter
+            onClicked: root.canceled()
         }
     }
 

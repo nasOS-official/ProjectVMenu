@@ -33,7 +33,7 @@ pkg_check_modules (LIBCURL libcurl)
 pkg_search_module(LIBCURL REQUIRED libcurl)
 include_directories(${LIBCURL_INCLUDE_DIRS})
 
-set(TS_FILES ProjectVMenu_en_US.ts ProjectVMenu_ru_RU.ts)
+set(TS_FILES translations/ProjectVMenu_ru_RU.ts translations/ProjectVMenu_en_US.ts)
 
 set(PROJECT_SOURCES
         main.cpp
