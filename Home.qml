@@ -12,19 +12,35 @@ Item {
         font.pixelSize: 32 * scaleFactor
         color: Theme.text
     }
-    ListView {
+    GridView {
         id: listView
         anchors.fill: parent
         anchors.topMargin: 125 * scaleFactor
         anchors.leftMargin: 18 * scaleFactor
         anchors.rightMargin: 18 * scaleFactor
-        orientation: ListView.Horizontal
-        spacing: 18 * scaleFactor
-        model: listModel
+        // anchors.bottomMargin: 200 * scaleFactor
+        cellWidth: (275 + 18) * scaleFactor
+        cellHeight: cellWidth
+        flow: GridView.TopToBottom
+        layoutDirection: Qt.LeftToRight
+        model: appsModel
+        highlight: Rectangle {
+            z: 20000
+            color: "#000000ff"
+            border.color: "#00b3ff"
+            border.width: 4 * scaleFactor
+        }
+        activeFocusOnTab: true
+        focus: true
+
         delegate: GameDelegate {
             image: model.image
             label: model.label
-
+            executable: model.link
+            onClicked: {
+                listView.currentIndex = index;
+                _vrunner.buttonClicked(executable);
+            }
         }
 
         rebound: Transition {
@@ -35,55 +51,4 @@ Item {
             }
         }
     }
-    ListModel {
-        id: listModel
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-        ListElement {
-            image: "https://supertuxkart.net/assets/images/header.jpg"
-            label: "SuperTuxCart"
-        }
-    }
-    // GameDelegate {
-    //     image: "https://supertuxkart.net/assets/images/header.jpg"
-    //     label: "SuperTuxCart"
-    // }
 }

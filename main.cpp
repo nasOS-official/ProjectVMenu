@@ -1,10 +1,12 @@
-#include "imageparser.h"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QLocale>
 #include <QTranslator>
-#include <iostream>
-#include <ostream>
+#include "VListModel.h"
+#include "vrunner.h"
+#include <QQmlContext>
+#include <QDir>
+#include "newsmanager.h"
 #include <curl/curl.h>
 #include <libxml/HTMLparser.h>
 #include <libxml/xpath.h>
@@ -17,6 +19,79 @@
 #include <jemalloc/jemalloc.h>
 #endif // !__FreeBSD__
 
+void tmpClean()
+{
+    QDir tempdir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + "pvm"));
+    if (!tempdir.removeRecursively()){
+        qDebug() << "TMP dir cleaning failed.";
+    }
+    xmlCleanupParser();
+    curl_global_cleanup();
+
+}
+
+
+void scanApps(VListModel* model) {
+    QDir applicationsDir("/usr/share/applications/");
+    if (!applicationsDir.exists()) {
+        qWarning() << "Directory /usr/share/applications/ does not exist.";
+        return;
+    }
+
+    QStringList filters;
+    filters << "*.desktop";
+    QFileInfoList desktopFiles = applicationsDir.entryInfoList(filters, QDir::Files | QDir::Readable);
+
+    for (const QFileInfo& fileInfo : std::as_const(desktopFiles)) {
+        QFile file(fileInfo.absoluteFilePath());
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qWarning() << "Could not open file for reading:" << fileInfo.absoluteFilePath();
+            continue;
+        }
+
+        QTextStream in(&file);
+        QString name;
+        QString execute;
+        QString tryexecute;
+        QString icon;
+        QString currentSection;
+        bool desktopEntryFound = false;
+
+        while (!in.atEnd()) {
+            QString line = in.readLine().trimmed();
+
+            if (line.startsWith("[")) {
+                currentSection = line;
+                if (currentSection == "[Desktop Entry]") {
+                    desktopEntryFound = true;
+                }
+            } else if (desktopEntryFound && currentSection == "[Desktop Entry]") {
+                int equalsIndex = line.indexOf('=');
+                if (equalsIndex > 0) {
+                    QString key = line.left(equalsIndex);
+                    QString value = line.mid(equalsIndex + 1);
+
+                    if (key == "Name") {
+                        name = value;
+                    } else if (key == "Exec") {
+                        execute = value;
+                    } else if (key == "TryExec") {
+                        tryexecute = value;
+                    } else if (key == "Icon") {
+                        icon = value;
+                    }
+                }
+            }
+        }
+        file.close();
+
+        if (desktopEntryFound) {
+            model->addData(VElement(name, "file://" + icon, tryexecute.isEmpty() ? execute : tryexecute));
+        }
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
     auto backgroundThread = true;
@@ -24,8 +99,23 @@ int main(int argc, char *argv[])
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
+    QCoreApplication::setApplicationName("PVMenu");
     QGuiApplication app(argc, argv);
+    xmlInitParser();
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    VRunner vrunner;
 
+    QObject::connect(&app, &QGuiApplication::aboutToQuit, tmpClean);
+
+    QDir tempdir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + "pvm"));
+    if (tempdir.exists()){
+        tempdir.removeRecursively();
+        if (!tempdir.mkpath(".")){
+            qDebug() << "TMP dir creation failed.";
+        }
+    } else {
+        tempdir.mkpath(".");
+    }
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
@@ -37,31 +127,16 @@ int main(int argc, char *argv[])
         }
     }
 
+
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:/");
-    // xmlInitParser();
-    // curl_global_init(CURL_GLOBAL_DEFAULT);
 
-    // std::string rss_url = "https://habr.com/ru/rss/hubs/reverse-engineering/articles/?fl=ru";
+    VListModel channelsModel;
+    VListModel appsModel;
+    VListModel newsModel;
+    NewsManager newsm(newsModel, channelsModel);
+    scanApps(&appsModel);
 
-    // std::vector<std::vector<std::string>> articles = parseRSS(rss_url);
-
-    // if (articles.empty()) {
-    //     std::cout << "No articles parsed or failed to fetch/parse RSS feed." << std::endl;
-    // } else {
-    //     std::cout << "Parsed " << articles.size() << " articles from RSS feed:" << std::endl;
-    //     for (const auto& article : articles) {
-    //         std::cout << "--------------------" << std::endl;
-    //         if (article.size() > 0) std::cout << "Title: " << article[0] << std::endl;
-    //         if (article.size() > 1) std::cout << "Link: " << article[1] << std::endl;
-    //         if (article.size() > 2 && !article[2].empty()) std::cout << "Image: " << article[2] << std::endl;
-    //         else if (article.size() > 2) std::cout << "Image: (Not found or not applicable)" << std::endl;
-    //     }
-    //     std::cout << "--------------------" << std::endl;
-    // }
-
-    // xmlCleanupParser();
-    // curl_global_cleanup();
     const QUrl url(QStringLiteral("qrc:/Main.qml"));
     QObject::connect(
         &engine,
@@ -72,6 +147,14 @@ int main(int argc, char *argv[])
                 QCoreApplication::exit(-1);
         },
         Qt::QueuedConnection);
+
+    engine.rootContext()->setContextProperty("_vrunner", &vrunner);
+    engine.rootContext()->setContextProperty("newsm", &newsm);
+    engine.rootContext()->setContextProperty("channelsModel", &channelsModel);
+    engine.rootContext()->setContextProperty("appsModel", &appsModel);
+    engine.rootContext()->setContextProperty("newsModel", &newsModel);
+
+
     engine.load(url);
 
     return app.exec();

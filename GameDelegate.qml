@@ -1,7 +1,8 @@
 import QtQuick
+import QtQuick.Controls
 import "themes"
 
-Item {
+Button {
     property alias image: _image.source
     property alias label: _text.text
     property string executable: ""

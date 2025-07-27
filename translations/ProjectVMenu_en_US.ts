@@ -2,6 +2,34 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
+    <name>AddChannel</name>
+    <message>
+        <location filename="../AddChannel.qml" line="37"/>
+        <source>If you want to add a channel, you need to write the channel name and URL.</source>
+        <translation>If you want to add a channel, you need to write the channel name and URL.</translation>
+    </message>
+    <message>
+        <location filename="../AddChannel.qml" line="72"/>
+        <source>Channel name:</source>
+        <translation>Channel name:</translation>
+    </message>
+    <message>
+        <location filename="../AddChannel.qml" line="116"/>
+        <source>Channel URL:</source>
+        <translation>Channel URL:</translation>
+    </message>
+    <message>
+        <location filename="../AddChannel.qml" line="158"/>
+        <source>Ok</source>
+        <translation>Ok</translation>
+    </message>
+    <message>
+        <location filename="../AddChannel.qml" line="169"/>
+        <source>Cancel</source>
+        <translation>Cancel</translation>
+    </message>
+</context>
+<context>
     <name>AskDialog</name>
     <message>
         <location filename="../AskDialog.qml" line="52"/>
@@ -33,9 +61,35 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../Main.qml" line="19"/>
+        <location filename="../Main.qml" line="27"/>
         <source>PVMenu</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>News</name>
+    <message>
+        <location filename="../News.qml" line="12"/>
+        <source>News</source>
+        <translation>News</translation>
+    </message>
+    <message>
+        <location filename="../News.qml" line="21"/>
+        <source>My channels</source>
+        <translation>My channels</translation>
+    </message>
+</context>
+<context>
+    <name>QTranslator</name>
+    <message>
+        <location filename="../newsmanager.cpp" line="57"/>
+        <source>Add channel to view news.</source>
+        <translation>Add channel to view news.</translation>
+    </message>
+    <message>
+        <location filename="../newsmanager.cpp" line="86"/>
+        <source>Add channel</source>
+        <translation>Add channel</translation>
     </message>
 </context>
 <context>

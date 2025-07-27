@@ -31,7 +31,7 @@ Item {
         TabSideButton {
             id: roundButton2
             size: btnSize
-            iconSource: "resources/games.svg"
+            iconSource: "resources/home.svg"
             iconSize: 30 * scaleFactor
             onClicked: {
                 if (0 != currentTab){
@@ -104,6 +104,9 @@ Item {
             iconSource: "resources/power.svg"
             iconSize: 30 * scaleFactor
             anchors.horizontalCenter: parent.horizontalCenter
+            onClicked: {
+                Qt.callLater(Qt.quit)
+            }
         }
     }
 }

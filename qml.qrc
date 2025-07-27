@@ -6,7 +6,6 @@
         <file>resources/settings.svg</file>
         <file>resources/power.svg</file>
         <file>resources/news.svg</file>
-        <file>resources/games.svg</file>
         <file>resources/devices.svg</file>
         <file>TabSideButton.qml</file>
         <file>Home.qml</file>
@@ -21,5 +20,7 @@
         <file>AskDialog.qml</file>
         <file>RoundedButton.qml</file>
         <file>GameDelegate.qml</file>
+        <file>resources/home.svg</file>
+        <file>AddChannel.qml</file>
     </qresource>
 </RCC>

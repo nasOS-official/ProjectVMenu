@@ -35,16 +35,29 @@ set(PROJECT_SOURCES
         qml.qrc
 )
 
+find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core)
+
 qt_add_executable(ProjectVMenu
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
+    vlistmodel.h vlistmodel.cpp
+    velement.h velement.cpp
+    vrunner.h vrunner.cpp
+    newsmanager.h newsmanager.cpp
+    imageparser.h imageparser.cpp
+
+
 )
 
 qt_add_translations(TARGETS ProjectVMenu TS_FILES ${TS_LIST} SOURCES ${PROJECT_SOURCES})
 
 target_link_libraries(ProjectVMenu
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick ${JEMALLOC_LIBRARIES} ${LIBXML_LIBRARIES} ${LIBCURL_LIBRARIES})
-
+target_link_libraries(ProjectVMenu PRIVATE Qt6::Core)
+target_link_libraries(ProjectVMenu PRIVATE Qt6::Core)
+target_link_libraries(ProjectVMenu PRIVATE Qt6::Core)
 
 set_target_properties(ProjectVMenu PROPERTIES
     ${BUNDLE_ID_OPTION}

@@ -8,9 +8,17 @@ Window {
     id: window
     property real scaleFactor: height / 720
     property bool isDarkTheme: true
+    property bool isLoading: true
+    property int channelIndex: 0
+    function loadState(value){
+        isLoading = value;
+    }
 
     Component.onCompleted: {
+        newsm.isLoading.connect(loadState)
         Theme.setTheme(isDarkTheme)
+        newsm.reloadChannels();
+        newsm.parseFirst();
     }
     width: 1280
     height: 720
@@ -87,6 +95,25 @@ Window {
         onTriggered: {
             timeLabel.text = Qt.formatTime(new Date(), "hh:mm")
         }
+    }
+    Loader {
+        id: addChannelLoader
+        sourceComponent: AddChannel {
+            x: 0
+            y: 0
+            height: Window.height
+            width: Window.width
+            onAccepted: {
+                newsm.addChannel(label, rss_url);
+                newsm.reloadChannels();
+                addChannelLoader.active = false;
+            }
+            onCanceled: {
+                // addChannelLoader.destroy()
+                addChannelLoader.active = false;
+            }
+        }
+        active: false
     }
 }
 
