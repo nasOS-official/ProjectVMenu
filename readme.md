@@ -6,15 +6,15 @@ ProjectVMenu is a lightweight and elegant QML-based graphical user interface (GU
 ## TO DO
 
 * **Application List:**
-    * [ ] Display a clean and easily navigable list of all installed games and applications.
+    * [x] Display a clean and easily navigable list of all installed games and applications.
     * [ ] Support for custom categories or folders for better organization.
 
 * **Application Center:**
     * [ ] A dedicated section to browse, discover, and install new applications or games.
 
 * **News Feed:**
-    * [ ] Stay updated with the latest gaming news, system updates, and announcements.
-    * [ ] Customizable news sources.
+    * [x] Stay updated with the latest gaming news, system updates, and announcements.
+    * [x] Customizable news sources.
 
 * **Settings:**
     * [ ] Comprehensive system settings for display, audio, network, and more.
