@@ -15,6 +15,10 @@ Item {
         anchors.fill: parent
     }
 
+    MouseArea {
+        anchors.fill: parent
+    }
+
     Column {
         id: columnLayout
         anchors.fill: parent
@@ -24,7 +28,6 @@ Item {
         TabSideButton {
             id: roundButton1
             size: btnSize
-            iconSize: 30 * scaleFactor
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
@@ -32,7 +35,6 @@ Item {
             id: roundButton2
             size: btnSize
             iconSource: "resources/home.svg"
-            iconSize: 30 * scaleFactor
             onClicked: {
                 if (0 != currentTab){
                     stackView.replace(Qt.createComponent("qrc:/Home.qml").createObject());
@@ -46,7 +48,6 @@ Item {
             id: roundButton3
             size: btnSize
             iconSource: "resources/shop.svg"
-            iconSize: 30 * scaleFactor
             onClicked: {
                 if (1 != currentTab){
                     stackView.replace(Qt.createComponent("qrc:/Shop.qml").createObject());
@@ -60,7 +61,6 @@ Item {
             id: roundButton4
             size: btnSize
             iconSource: "resources/news.svg"
-            iconSize: 30 * scaleFactor
             onClicked: {
                 if (2 != currentTab){
                     stackView.replace(Qt.createComponent("qrc:/News.qml").createObject());
@@ -74,7 +74,6 @@ Item {
             id: roundButton5
             size: btnSize
             iconSource: "resources/devices.svg"
-            iconSize: 30 * scaleFactor
             onClicked: {
                 if (3 != currentTab){
                     stackView.replace(Qt.createComponent("qrc:/Devices.qml").createObject());
@@ -88,7 +87,6 @@ Item {
             id: roundButton6
             size: btnSize
             iconSource: "resources/settings.svg"
-            iconSize: 30 * scaleFactor
             onClicked: {
                 if (4 != currentTab){
                     stackView.replace(Qt.createComponent("qrc:/Settings.qml").createObject());
@@ -102,7 +100,6 @@ Item {
             id: roundButton7
             size: btnSize
             iconSource: "resources/power.svg"
-            iconSize: 30 * scaleFactor
             anchors.horizontalCenter: parent.horizontalCenter
             onClicked: {
                 Qt.callLater(Qt.quit)

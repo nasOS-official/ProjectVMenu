@@ -1,28 +1,60 @@
 import QtQuick
 import QtQuick.Controls
 import "themes"
-// import /*QtQuick.Controls*/ 2.15
-// import QtQuick.Layouts 2.15
+import QtQuick.Layouts 2.15
 
 
 
 Item {
     id: _root
-    Text {
-        text: qsTr("News")
+    RowLayout {
+        id: row
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.leftMargin: 16 * scaleFactor
         anchors.topMargin: 49 * scaleFactor
-        font.pixelSize: 32 * scaleFactor
-        color: Theme.text
+        spacing: 8 * scaleFactor
+
+        Text {
+            text: qsTr("News")
+            font.pixelSize: 32 * scaleFactor
+            color: Theme.text
+        }
+
+        Button {
+            id: button
+            height: 30 * scaleFactor
+            width: height
+            icon.source: "resources/reload.svg"
+            icon.height: 20 * scaleFactor
+            icon.width: 20 * scaleFactor
+            icon.color: Theme.text
+
+            background: Rectangle {
+                radius: parent.height / 2
+                color: parent.pressed ? Theme.buttonPressed : parent.hovered ? Theme.buttonHovered : Theme.background
+            }
+
+            onClicked: {
+                newsm.reloadNews();
+            }
+        }
     }
+
     Text {
         text: qsTr("My channels")
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.leftMargin: 16 * scaleFactor
         anchors.topMargin: 507 * scaleFactor
+        font.pixelSize: 32 * scaleFactor
+        color: Theme.text
+    }
+    Text {
+        text: channelName
+        anchors.top: parent.top
+        anchors.topMargin: 49 * scaleFactor
+        anchors.horizontalCenter: parent.horizontalCenter
         font.pixelSize: 32 * scaleFactor
         color: Theme.text
     }
@@ -120,6 +152,7 @@ Item {
                     if (model.link === "add"){
                         addChannelLoader.active = true;
                     } else {
+                        channelName = model.label;
                         newsm.parseNews(model.link);
                     }
                 }
@@ -159,6 +192,5 @@ Item {
         visible: isLoading
 
     }
-
 
 }

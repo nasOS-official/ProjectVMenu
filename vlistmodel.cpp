@@ -36,6 +36,8 @@ QVariant VListModel::data(const QModelIndex &index, int role) const
         return element.getImage();
     case LinkRole:
         return element.getLink();
+    case IsStartedRole:
+        return element.getIsStarted();
     default:
         return QVariant();
 
@@ -48,6 +50,7 @@ QHash<int, QByteArray> VListModel::roleNames() const
     roles[LabelRole] = "label";
     roles[ImageRole] = "image";
     roles[LinkRole] = "link";
+    roles[IsStartedRole] = "isStarted";
     return roles;
 }
 
@@ -58,5 +61,11 @@ void VListModel::addData(VElement element)
     endResetModel();
 }
 
+void VListModel::setRunning(int index, bool state){
+    VElement &element = _data[index];
+    beginResetModel();
+    element.setIsStarted(state);
+    endResetModel();
+}
 
 

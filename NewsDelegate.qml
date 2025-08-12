@@ -20,6 +20,8 @@ Button {
     Image {
         id: _image
         anchors.fill: parent
+        sourceSize.width: 550
+        sourceSize.height: 356
         fillMode: Image.PreserveAspectCrop
     }
     Item{

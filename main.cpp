@@ -2,22 +2,12 @@
 #include <QQmlApplicationEngine>
 #include <QLocale>
 #include <QTranslator>
-#include "VListModel.h"
+#include "vlistmodel.h"
 #include "vrunner.h"
 #include <QQmlContext>
 #include <QDir>
 #include "newsmanager.h"
-#include <curl/curl.h>
-#include <libxml/HTMLparser.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include <libxml/parser.h>
 
-#ifdef __FreeBSD__
-#include <malloc_np.h>
-#else // __FreeBSD__
-#include <jemalloc/jemalloc.h>
-#endif // !__FreeBSD__
 
 void tmpClean()
 {
@@ -25,9 +15,6 @@ void tmpClean()
     if (!tempdir.removeRecursively()){
         qDebug() << "TMP dir cleaning failed.";
     }
-    xmlCleanupParser();
-    curl_global_cleanup();
-
 }
 
 
@@ -94,17 +81,11 @@ void scanApps(VListModel* model) {
 
 int main(int argc, char *argv[])
 {
-    auto backgroundThread = true;
-    mallctl("background_thread", nullptr, nullptr, &backgroundThread, sizeof(bool));
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
     QCoreApplication::setApplicationName("PVMenu");
     QGuiApplication app(argc, argv);
-    xmlInitParser();
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    VRunner vrunner;
-
     QObject::connect(&app, &QGuiApplication::aboutToQuit, tmpClean);
 
     QDir tempdir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + "pvm"));
@@ -136,6 +117,7 @@ int main(int argc, char *argv[])
     VListModel newsModel;
     NewsManager newsm(newsModel, channelsModel);
     scanApps(&appsModel);
+    VRunner vrunner(appsModel);
 
     const QUrl url(QStringLiteral("qrc:/Main.qml"));
     QObject::connect(

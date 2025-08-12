@@ -9,18 +9,22 @@ Item {
     signal canceled
     property alias label: label.text
     property alias rss_url: rss_url.text
-    // anchors.fill: parent
+
     Rectangle{
         opacity: 0.7
         color: "black"
         anchors.fill: parent
     }
+    MouseArea {
+        anchors.fill: parent
+    }
+
     Item {
 
         width: 800 * scaleFactor
         height: 300 * scaleFactor
         anchors.centerIn: parent
-        property alias text: _text.text
+
 
         Rectangle {
             id: rectangle
@@ -40,9 +44,9 @@ Item {
             anchors.top: parent.top
             anchors.leftMargin: 8 * scaleFactor
             anchors.rightMargin: 8 * scaleFactor
-            anchors.topMargin: 24 * scaleFactor
+            anchors.topMargin: 32 * scaleFactor
             font.pixelSize: 24 * scaleFactor
-            horizontalAlignment: Text.AlignHCenter
+            horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
             wrapMode: Text.WordWrap
         }

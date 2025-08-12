@@ -13,7 +13,8 @@ public:
     enum VListRoles {
         LabelRole = Qt::UserRole + 1,
         ImageRole,
-        LinkRole
+        LinkRole,
+        IsStartedRole
     };
     explicit VListModel(QObject *parent = nullptr);
 
@@ -23,6 +24,7 @@ public:
     void addData(VElement element);
     int columnCount(const QModelIndex &parent) const;
     void clearData();
+    void setRunning(int index, bool state);
 };
 
 #endif // VLISTMODEL_H

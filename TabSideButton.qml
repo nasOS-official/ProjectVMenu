@@ -13,7 +13,7 @@ RoundButton {
         color: root.pressed ? Theme.buttonPressed : root.hovered ? Theme.buttonHovered : Theme.button
         radius: height / 2
     }
-    icon.width: iconSize
-    icon.height: iconSize
+    icon.width: iconSize * scaleFactor
+    icon.height: iconSize * scaleFactor
     icon.color: Theme.text
 }

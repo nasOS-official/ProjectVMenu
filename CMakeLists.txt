@@ -14,18 +14,10 @@ find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Quick LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick LinguistTools)
 find_package(PkgConfig REQUIRED)
 
-
-pkg_check_modules (JEMALLOC jemalloc)
-pkg_check_modules (LIBXML libxml-2.0)
 pkg_check_modules (LIBCURL libcurl)
 
-
-pkg_search_module(JEMALLOC REQUIRED jemalloc)
-pkg_search_module(LIBXML REQUIRED libxml-2.0)
 pkg_search_module(LIBCURL REQUIRED libcurl)
 
-include_directories(${JEMALLOC_INCLUDE_DIRS})
-include_directories(${LIBXML_INCLUDE_DIRS})
 include_directories(${LIBCURL_INCLUDE_DIRS})
 
 set(TS_LIST translations/ProjectVMenu_ru_RU.ts translations/ProjectVMenu_en_US.ts)
@@ -46,15 +38,12 @@ qt_add_executable(ProjectVMenu
     velement.h velement.cpp
     vrunner.h vrunner.cpp
     newsmanager.h newsmanager.cpp
-    imageparser.h imageparser.cpp
-
-
 )
 
 qt_add_translations(TARGETS ProjectVMenu TS_FILES ${TS_LIST} SOURCES ${PROJECT_SOURCES})
 
 target_link_libraries(ProjectVMenu
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick ${JEMALLOC_LIBRARIES} ${LIBXML_LIBRARIES} ${LIBCURL_LIBRARIES})
+  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick ${LIBCURL_LIBRARIES})
 target_link_libraries(ProjectVMenu PRIVATE Qt6::Core)
 target_link_libraries(ProjectVMenu PRIVATE Qt6::Core)
 target_link_libraries(ProjectVMenu PRIVATE Qt6::Core)

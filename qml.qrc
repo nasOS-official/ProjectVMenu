@@ -22,5 +22,7 @@
         <file>GameDelegate.qml</file>
         <file>resources/home.svg</file>
         <file>AddChannel.qml</file>
+        <file>resources/playing.svg</file>
+        <file>resources/reload.svg</file>
     </qresource>
 </RCC>

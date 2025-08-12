@@ -3,6 +3,7 @@ import "themes"
 
 Item {
     id: item1
+
     Text {
         text: qsTr("Home")
         anchors.left: parent.left
@@ -34,12 +35,20 @@ Item {
         focus: true
 
         delegate: GameDelegate {
+            id: _gameDelegate
             image: model.image
             label: model.label
             executable: model.link
+            playing: model.isStarted
+
             onClicked: {
                 listView.currentIndex = index;
-                _vrunner.buttonClicked(executable);
+                if (_vrunner.isRunning() === false){
+                    _vrunner.start(executable, index);
+                } else if (!exitAppLoader.active) {
+                    _vrunner.startRequest(executable, index);
+                    exitAppLoader.active = true;
+                }
             }
         }
 
