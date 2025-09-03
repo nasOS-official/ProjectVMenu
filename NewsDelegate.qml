@@ -9,9 +9,6 @@ Button {
 
     width: scaleFactor * 275
     height: scaleFactor * 178
-    activeFocusOnTab: true
-    focus: true
-
 
     Rectangle {
         color: Theme.backgroundAlt
@@ -22,6 +19,7 @@ Button {
         anchors.fill: parent
         sourceSize.width: 550
         sourceSize.height: 356
+        cache: false
         fillMode: Image.PreserveAspectCrop
     }
     Item{

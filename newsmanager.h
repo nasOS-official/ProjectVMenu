@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QRegularExpression>
+#include <QSettings>
 #include "vlistmodel.h"
 
 struct ParseItemData {
@@ -21,12 +22,13 @@ public:
     ~NewsManager();
 
     void rssWork(const std::string& url);
-    Q_INVOKABLE void parseNews(const QString& url);
+    Q_INVOKABLE void parseNews(const QString& url, const int index);
     Q_INVOKABLE void addChannel(const QString& label,  const QString& url);
     Q_INVOKABLE void reloadChannels();
     Q_INVOKABLE QString parseFirst();
     Q_INVOKABLE QString parseLast();
     Q_INVOKABLE void reloadNews();
+    Q_INVOKABLE QString removeChannel();
 
 private:
     // static QRegularExpression re;
@@ -43,10 +45,12 @@ private:
     static std::vector<ParseItemData> parseRSS(std::string url);
 
 
+    QSettings channels;
     VListModel *_model;
     VListModel *_channelsList;
     QString currentURL;
-    bool loading;
+    bool loading = false;
+    int currentIndex = 0;
 signals:
     void isLoading(bool);
 };

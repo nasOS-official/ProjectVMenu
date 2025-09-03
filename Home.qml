@@ -17,8 +17,8 @@ Item {
         id: listView
         anchors.fill: parent
         anchors.topMargin: 125 * scaleFactor
-        anchors.leftMargin: 18 * scaleFactor
-        anchors.rightMargin: 18 * scaleFactor
+        anchors.leftMargin: globalSpacing
+        anchors.rightMargin: globalSpacing
         // anchors.bottomMargin: 200 * scaleFactor
         cellWidth: (275 + 18) * scaleFactor
         cellHeight: cellWidth
@@ -31,8 +31,6 @@ Item {
             border.color: "#00b3ff"
             border.width: 4 * scaleFactor
         }
-        activeFocusOnTab: true
-        focus: true
 
         delegate: GameDelegate {
             id: _gameDelegate

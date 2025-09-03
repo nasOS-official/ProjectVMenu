@@ -6,13 +6,14 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(QML_IMPORT_PATH ${PROJECT_SOURCE_DIR})
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Quick LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick LinguistTools)
 find_package(PkgConfig REQUIRED)
+find_package(mimalloc REQUIRED)
 
 pkg_check_modules (LIBCURL libcurl)
 
@@ -27,10 +28,6 @@ set(PROJECT_SOURCES
         qml.qrc
 )
 
-find_package(Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt6 REQUIRED COMPONENTS Core)
-
 qt_add_executable(ProjectVMenu
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
@@ -44,9 +41,20 @@ qt_add_translations(TARGETS ProjectVMenu TS_FILES ${TS_LIST} SOURCES ${PROJECT_S
 
 target_link_libraries(ProjectVMenu
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick ${LIBCURL_LIBRARIES})
-target_link_libraries(ProjectVMenu PRIVATE Qt6::Core)
-target_link_libraries(ProjectVMenu PRIVATE Qt6::Core)
-target_link_libraries(ProjectVMenu PRIVATE Qt6::Core)
+target_link_libraries(ProjectVMenu PUBLIC mimalloc)
+
+target_compile_options(ProjectVMenu PRIVATE
+    $<$<CONFIG:Debug>:-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all
+                      -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow
+                      -fno-sanitize=null -fno-sanitize=alignment
+                      -Wall -Wextra -Wpedantic>
+    $<$<CONFIG:Release>:-Wall -Wextra -Wpedantic -Os -flto -fno-asynchronous-unwind-tables
+                        -Wl,--strip-all -ffunction-sections -fdata-sections -Wl,--gc-sections -s>
+    $<$<CONFIG:MinSizeRel>:-Wall -Wextra -Wpedantic -Os -flto -fno-asynchronous-unwind-tables
+                           -Wl,--strip-all -ffunction-sections -fdata-sections -Wl,--gc-sections -s>
+)
+
+
 
 set_target_properties(ProjectVMenu PROPERTIES
     ${BUNDLE_ID_OPTION}

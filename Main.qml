@@ -7,10 +7,13 @@ import "themes"
 Window {
     id: window
     property real scaleFactor: height / 720
+    property int globalSpacing: 18 * scaleFactor
     property bool isDarkTheme: true
     property bool isLoading: true
     property int channelIndex: 0
     property string channelName: ""
+
+
     function loadState(value){
         isLoading = value;
     }
@@ -39,11 +42,8 @@ Window {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
+        initialItem: "qrc:/Home.qml"
 
-        initialItem: Loader {
-            source: "Home.qml"
-
-        }
         replaceEnter: Transition {
             PropertyAnimation {
                 property: "opacity"

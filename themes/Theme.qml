@@ -5,17 +5,16 @@ import QtQuick 2.12
 Item {
     QtObject{
         id: themes
-        readonly property var light: ["#ffffff", "#dbdbdb", "#cacaca", "#000000", "#d5d5d5"]
-        readonly property var dark: ["#3c3c3c", "#454545", "#535353", "#ffffff", "#262626"]
+        readonly property list<string> light: ["#ffffff", "#dbdbdb", "#cacaca", "#000000", "#d5d5d5"]
+        readonly property list<string> dark: ["#3c3c3c", "#454545", "#535353", "#ffffff", "#262626"]
     }
-    property var currentTheme: themes.dark
+    property list<string> currentTheme: themes.dark
     property bool isDarkTheme: true
 
     function setTheme(isDark) {
         isDarkTheme = isDark;
         currentTheme = isDark ? themes.dark : themes.light;
     }
-
 
     readonly property string background: currentTheme[0]
     readonly property string tabbar: currentTheme[1]

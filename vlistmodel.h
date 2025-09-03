@@ -18,11 +18,11 @@ public:
     };
     explicit VListModel(QObject *parent = nullptr);
 
-    int rowCount(const QModelIndex &parent) const;
+    int rowCount(const QModelIndex &) const;
     QVariant data(const QModelIndex &index, int role) const;
     QHash<int, QByteArray> roleNames() const;
     void addData(VElement element);
-    int columnCount(const QModelIndex &parent) const;
+    int columnCount(const QModelIndex &) const;
     void clearData();
     void setRunning(int index, bool state);
 };

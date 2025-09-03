@@ -20,6 +20,7 @@ public:
     Q_INVOKABLE void acceptStartRequest();
 
 private:
+    void scanApps();
     QProcess process;
     int _currentIndex;
     int _requestIndex;

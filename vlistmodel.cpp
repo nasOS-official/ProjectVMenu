@@ -5,12 +5,12 @@ VListModel::VListModel(QObject *parent)
 {}
 
 
-int VListModel::rowCount(const QModelIndex &parent) const
+int VListModel::rowCount(const QModelIndex &) const
 {
     return _data.count();
 }
 
-int VListModel::columnCount(const QModelIndex &parent) const
+int VListModel::columnCount(const QModelIndex &) const
 {
     return 1;
 }

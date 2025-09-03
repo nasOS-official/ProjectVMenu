@@ -10,8 +10,6 @@ Button {
 
     width: scaleFactor * 275
     height: scaleFactor * 275
-    activeFocusOnTab: true
-    focus: true
 
     Rectangle {
         color: Theme.backgroundAlt
@@ -22,6 +20,7 @@ Button {
         anchors.fill: parent
         sourceSize.width: 550
         sourceSize.height: 550
+        cache: false
         fillMode: Image.PreserveAspectCrop
     }
     Item{
@@ -64,6 +63,7 @@ Button {
             height: width
             icon.source: "resources/playing.svg"
             icon.color: "#ffffff"
+            icon.cache: false
 
         }
 

@@ -6,8 +6,8 @@ import "themes"
 Item {
     id: rightPanel
     property int btnSize: 80 * scaleFactor
-    width: 115 * scaleFactor
-    property int currentTab: 0
+    width: visible ? 115 * scaleFactor : 0
+    property int currentTab: 1
 
     Rectangle {
         id: rectangle
@@ -19,91 +19,87 @@ Item {
         anchors.fill: parent
     }
 
-    Column {
-        id: columnLayout
-        anchors.fill: parent
+    ListModel {
+        id: rightModel
+        ListElement { icon: "";}
+        ListElement { icon: "resources/home.svg";}
+        ListElement { icon: "resources/shop.svg";}
+        ListElement { icon: "resources/news.svg";}
+        ListElement { icon: "resources/devices.svg";}
+        ListElement { icon: "resources/settings.svg";}
+        ListElement { icon: "resources/power.svg";}
+    }
+
+    // Shortcut {
+    //     sequence: "Escape"
+    //     onActivated: {
+    //         if (currentTab != 1){
+    //             stackView.replace("qrc:/Home.qml");
+    //             currentTab = 1;
+    //             rightView.currentIndex = 1;
+    //             // rightPanel.visible = true;
+    //         }
+    //     }
+    // }
+
+    GridView {
+        id: rightView
+        width: btnSize
+
+        boundsBehavior: Flickable.StopAtBounds
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.topMargin: 26 * scaleFactor
-        spacing: 18 * scaleFactor
+        anchors.horizontalCenter: parent.horizontalCenter
+        model: rightModel
 
-        TabSideButton {
-            id: roundButton1
-            size: btnSize
-            anchors.horizontalCenter: parent.horizontalCenter
+        highlight: Rectangle {
+            z: 20000
+            color: "#000000ff"
+            border.color: "#00b3ff"
+            border.width: 4 * scaleFactor
+            radius: height / 2
         }
 
-        TabSideButton {
-            id: roundButton2
+        cellWidth: btnSize
+        cellHeight: btnSize + globalSpacing
+
+        delegate: TabSideButton {
+
             size: btnSize
-            iconSource: "resources/home.svg"
+            iconSource: model.icon
             onClicked: {
-                if (0 != currentTab){
-                    stackView.replace(Qt.createComponent("qrc:/Home.qml").createObject());
-                    currentTab = 0;
+                if (index != currentTab){
+                    switch (index){
+                    case 1:
+                        stackView.replace("qrc:/Home.qml");
+                        break;
+                    case 2:
+                        stackView.replace("qrc:/Shop.qml");
+                        break;
+                    case 3:
+                        stackView.replace("qrc:/News.qml");
+                        break;
+                    case 4:
+                        stackView.replace("qrc:/Devices.qml");
+                        break;
+                    case 5:
+                        stackView.replace("qrc:/Settings.qml");
+                        break;
+                    case 6:
+                        Qt.callLater(Qt.quit);
+                        break;
+                    }
+                    if (index > 0){
+                        // rightPanel.visible = false;
+                        currentTab = index;
+                        rightView.currentIndex = index;
+                    }
                 }
             }
-            anchors.horizontalCenter: parent.horizontalCenter
         }
-
-        TabSideButton {
-            id: roundButton3
-            size: btnSize
-            iconSource: "resources/shop.svg"
-            onClicked: {
-                if (1 != currentTab){
-                    stackView.replace(Qt.createComponent("qrc:/Shop.qml").createObject());
-                    currentTab = 1;
-                }
-            }
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        TabSideButton {
-            id: roundButton4
-            size: btnSize
-            iconSource: "resources/news.svg"
-            onClicked: {
-                if (2 != currentTab){
-                    stackView.replace(Qt.createComponent("qrc:/News.qml").createObject());
-                    currentTab = 2;
-                }
-            }
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        TabSideButton {
-            id: roundButton5
-            size: btnSize
-            iconSource: "resources/devices.svg"
-            onClicked: {
-                if (3 != currentTab){
-                    stackView.replace(Qt.createComponent("qrc:/Devices.qml").createObject());
-                    currentTab = 3;
-                }
-            }
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        TabSideButton {
-            id: roundButton6
-            size: btnSize
-            iconSource: "resources/settings.svg"
-            onClicked: {
-                if (4 != currentTab){
-                    stackView.replace(Qt.createComponent("qrc:/Settings.qml").createObject());
-                    currentTab = 4;
-                }
-            }
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        TabSideButton {
-            id: roundButton7
-            size: btnSize
-            iconSource: "resources/power.svg"
-            anchors.horizontalCenter: parent.horizontalCenter
-            onClicked: {
-                Qt.callLater(Qt.quit)
-            }
-        }
+    }
+    Component.onCompleted: {
+        rightView.currentIndex = currentTab;
     }
 }

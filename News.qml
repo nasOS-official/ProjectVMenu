@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import "themes"
-import QtQuick.Layouts 2.15
+import QtQuick.Layouts
 
 
 
@@ -37,6 +37,25 @@ Item {
 
             onClicked: {
                 newsm.reloadNews();
+            }
+        }
+        Button {
+            height: 30 * scaleFactor
+            width: height
+            icon.source: "resources/delete.svg"
+            icon.height: 20 * scaleFactor
+            icon.width: 20 * scaleFactor
+            icon.color: Theme.text
+
+            background: Rectangle {
+                radius: parent.height / 2
+                color: parent.pressed ? Theme.buttonPressed : parent.hovered ? Theme.buttonHovered : Theme.background
+            }
+
+            onClicked: {
+                channelName = newsm.removeChannel();
+                channelIndex = 0;
+                channelsView.currentIndex = channelIndex;
             }
         }
     }
@@ -75,8 +94,7 @@ Item {
             border.color: "#00b3ff"
             border.width: 4 * scaleFactor
         }
-        activeFocusOnTab: true
-        // focus: true
+
         anchors.rightMargin: 18 * scaleFactor
         model: newsModel
         delegate: NewsDelegate {
@@ -110,7 +128,6 @@ Item {
         layoutDirection: Qt.LeftToRight
         model: channelsModel
 
-
         highlight: Rectangle {
             z: 20000
             color: "#000000ff"
@@ -134,9 +151,7 @@ Item {
                     color: parent.pressed ? Theme.buttonPressed : parent.hovered ? Theme.buttonHovered : Theme.button
                     radius: height / 2
                 }
-                // icon.width: iconSize
-                // icon.height: iconSize
-                // icon.color: Theme.text
+
                 contentItem: Text {
                     text: model.link === "add" ? "+" : model.label[0]
                     font.pixelSize: 32 * scaleFactor
@@ -147,13 +162,15 @@ Item {
                     anchors.fill: parent
                 }
                 onClicked: {
-                    channelsView.currentIndex = index;
-                    channelIndex = index;
-                    if (model.link === "add"){
-                        addChannelLoader.active = true;
-                    } else {
-                        channelName = model.label;
-                        newsm.parseNews(model.link);
+                    if (!isLoading){
+                        channelsView.currentIndex = index;
+                        channelIndex = index;
+                        if (model.link === "add"){
+                            addChannelLoader.active = true;
+                        } else {
+                            channelName = model.label;
+                            newsm.parseNews(model.link, index);
+                        }
                     }
                 }
             }
@@ -190,7 +207,9 @@ Item {
         height: 250 * scaleFactor
         width: height
         visible: isLoading
-
+    }
+    Component.onCompleted: {
+        gridView.focus = true;
     }
 
 }

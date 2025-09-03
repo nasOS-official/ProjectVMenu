@@ -7,7 +7,9 @@
 #include <QQmlContext>
 #include <QDir>
 #include "newsmanager.h"
-
+#include <QQuickWindow>
+#include <QQuickGraphicsConfiguration>
+#include <mimalloc-new-delete.h>
 
 void tmpClean()
 {
@@ -18,73 +20,18 @@ void tmpClean()
 }
 
 
-void scanApps(VListModel* model) {
-    QDir applicationsDir("/usr/share/applications/");
-    if (!applicationsDir.exists()) {
-        qWarning() << "Directory /usr/share/applications/ does not exist.";
-        return;
-    }
-
-    QStringList filters;
-    filters << "*.desktop";
-    QFileInfoList desktopFiles = applicationsDir.entryInfoList(filters, QDir::Files | QDir::Readable);
-
-    for (const QFileInfo& fileInfo : std::as_const(desktopFiles)) {
-        QFile file(fileInfo.absoluteFilePath());
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qWarning() << "Could not open file for reading:" << fileInfo.absoluteFilePath();
-            continue;
-        }
-
-        QTextStream in(&file);
-        QString name;
-        QString execute;
-        QString tryexecute;
-        QString icon;
-        QString currentSection;
-        bool desktopEntryFound = false;
-
-        while (!in.atEnd()) {
-            QString line = in.readLine().trimmed();
-
-            if (line.startsWith("[")) {
-                currentSection = line;
-                if (currentSection == "[Desktop Entry]") {
-                    desktopEntryFound = true;
-                }
-            } else if (desktopEntryFound && currentSection == "[Desktop Entry]") {
-                int equalsIndex = line.indexOf('=');
-                if (equalsIndex > 0) {
-                    QString key = line.left(equalsIndex);
-                    QString value = line.mid(equalsIndex + 1);
-
-                    if (key == "Name") {
-                        name = value;
-                    } else if (key == "Exec") {
-                        execute = value;
-                    } else if (key == "TryExec") {
-                        tryexecute = value;
-                    } else if (key == "Icon") {
-                        icon = value;
-                    }
-                }
-            }
-        }
-        file.close();
-
-        if (desktopEntryFound) {
-            model->addData(VElement(name, "file://" + icon, tryexecute.isEmpty() ? execute : tryexecute));
-        }
-    }
-}
-
-
 int main(int argc, char *argv[])
 {
+    mi_option_set(mi_option_purge_delay, 0);
+    mi_option_set(mi_option_purge_decommits, 1);
+    mi_option_disable(mi_option_eager_commit);
+    mi_option_set(mi_option_abandoned_page_purge, 1);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
     QCoreApplication::setApplicationName("PVMenu");
+    QCoreApplication::setOrganizationName("ProjectV");
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::Software);
     QGuiApplication app(argc, argv);
     QObject::connect(&app, &QGuiApplication::aboutToQuit, tmpClean);
 
@@ -112,11 +59,11 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:/");
 
+
     VListModel channelsModel;
     VListModel appsModel;
     VListModel newsModel;
     NewsManager newsm(newsModel, channelsModel);
-    scanApps(&appsModel);
     VRunner vrunner(appsModel);
 
     const QUrl url(QStringLiteral("qrc:/Main.qml"));
@@ -138,6 +85,15 @@ int main(int argc, char *argv[])
 
 
     engine.load(url);
+
+    // if (!engine.rootObjects().isEmpty()) {
+    // QQuickWindow *win = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
+    // if (win) {
+    //     // win->setPersistentGraphics(false);
+    //     // win->setPersistentSceneGraph(false);
+
+    // }
+    // }
 
     return app.exec();
 }

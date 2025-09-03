@@ -24,5 +24,7 @@
         <file>AddChannel.qml</file>
         <file>resources/playing.svg</file>
         <file>resources/reload.svg</file>
+        <file>resources/delete.svg</file>
+        <file>SettingsDelegate.qml</file>
     </qresource>
 </RCC>

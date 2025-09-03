@@ -6,8 +6,8 @@
 #include <curl/curl.h>
 #include <chrono>
 #include <random>
-#include <sstream>
 #include <iostream>
+#include <fstream>
 
 
 #include "vlistmodel.h"
@@ -37,7 +37,7 @@ NewsManager::~NewsManager()
 size_t NewsManager::writer(char *data, size_t size, size_t nmemb, void *userp) {
     std::string *writerData = static_cast<std::string*>(userp);
     if(writerData == NULL) {
-        fprintf(stderr, "writer: userp is NULL\n");
+        qCritical() << "writer: userp is NULL";
         return 0;
     }
     writerData->append(data, size * nmemb);
@@ -73,90 +73,49 @@ std::string NewsManager::generateFilename(const std::string &original_url) {
 
 std::string NewsManager::downloadImage(const std::string &image_url_to_download) {
     std::string local_file_path = "";
-    std::string image_data_buffer;
+    std::string image_data_buffer = "";
     char curl_error_buffer_image[CURL_ERROR_SIZE];
     CURL *conn_image = NULL;
-    CURLcode code_image;
+    CURLcode res;
 
     conn_image = curl_easy_init();
     if (conn_image == NULL) {
-        fprintf(stderr, "download_and_save_image: Failed to create CURL connection\n");
+        qDebug() << "downloadImage: Failed to create CURL connection\n";
         return "";
     }
 
-    code_image = curl_easy_setopt(conn_image, CURLOPT_ERRORBUFFER, curl_error_buffer_image);
-    if (code_image != CURLE_OK) {
-        fprintf(stderr, "download_and_save_image: Failed to set error buffer [%d]: %s\n", code_image, curl_error_buffer_image);
-        curl_easy_cleanup(conn_image);
-        return "";
-    }
+    curl_easy_setopt(conn_image, CURLOPT_ERRORBUFFER, curl_error_buffer_image);
+    curl_easy_setopt(conn_image, CURLOPT_TIMEOUT, 3L);
+    curl_easy_setopt(conn_image, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0");
+    curl_easy_setopt(conn_image, CURLOPT_URL, image_url_to_download.c_str());
+    curl_easy_setopt(conn_image, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(conn_image, CURLOPT_WRITEFUNCTION, writer);
+    curl_easy_setopt(conn_image, CURLOPT_WRITEDATA, &image_data_buffer);
 
-    code_image = curl_easy_setopt(conn_image, CURLOPT_TIMEOUT, 3L);
-    if (code_image != CURLE_OK) {
-        fprintf(stderr, "download_and_save_image: Failed to set timeout option [%s]\n", curl_error_buffer_image);
-        curl_easy_cleanup(conn_image);
-        return "";
-    }
-
-    code_image = curl_easy_setopt(curl_error_buffer_image, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0");
-    if (code_image != CURLE_OK) {
-        fprintf(stderr, "extractOgImageUrl: Failed to set UserAgent [%s]\n", curl_error_buffer_image);
-        curl_easy_cleanup(conn_image);
-        return "";
-    }
-
-
-    code_image = curl_easy_setopt(conn_image, CURLOPT_URL, image_url_to_download.c_str());
-    if (code_image != CURLE_OK) {
-        fprintf(stderr, "download_and_save_image: Failed to set URL '%s': %s\n", image_url_to_download.c_str(), curl_error_buffer_image);
-        curl_easy_cleanup(conn_image);
-        return "";
-    }
-
-    code_image = curl_easy_setopt(conn_image, CURLOPT_FOLLOWLOCATION, 1L);
-    if (code_image != CURLE_OK) {
-        fprintf(stderr, "download_and_save_image: Failed to set redirect option [%s]\n", curl_error_buffer_image);
-        curl_easy_cleanup(conn_image);
-        return "";
-    }
-
-    code_image = curl_easy_setopt(conn_image, CURLOPT_WRITEFUNCTION, writer);
-    if (code_image != CURLE_OK) {
-        fprintf(stderr, "download_and_save_image: Failed to set writer [%s]\n", curl_error_buffer_image);
-        curl_easy_cleanup(conn_image);
-        return "";
-    }
-    image_data_buffer.clear();
-    code_image = curl_easy_setopt(conn_image, CURLOPT_WRITEDATA, &image_data_buffer);
-    if (code_image != CURLE_OK) {
-        fprintf(stderr, "download_and_save_image: Failed to set write data [%s]\n", curl_error_buffer_image);
-        curl_easy_cleanup(conn_image);
-        return "";
-    }
-
-    code_image = curl_easy_perform(conn_image);
-    if (code_image != CURLE_OK) {
-        fprintf(stderr, "download_and_save_image: Failed to download image from '%s': %s\n", image_url_to_download.c_str(), curl_error_buffer_image);
+    res = curl_easy_perform(conn_image);
+    if (res != CURLE_OK) {
+        qDebug() << "downloadImage: curl_easy_perform() failed:" << curl_easy_strerror(res);
     }
     curl_easy_cleanup(conn_image);
 
     if (image_data_buffer.empty()) {
-        fprintf(stderr, "download_and_save_image: Image data buffer is empty for '%s'\n", image_url_to_download.c_str());
+        qDebug() << "downloadImage: Image data buffer is empty for" << image_url_to_download;
         return "";
     }
 
     std::string unique_filename = generateFilename(image_url_to_download);
     local_file_path = "/tmp/pvm/" + unique_filename;
 
-    FILE* fp = fopen(local_file_path.c_str(), "wb");
-    if (fp) {
-        fwrite(image_data_buffer.data(), 1, image_data_buffer.size(), fp);
-        fclose(fp);
-        fprintf(stderr, "Image saved to: %s\n", local_file_path.c_str());
+    std::ofstream fp(local_file_path, std::ios::binary);
+
+    if (fp.is_open()) {
+        fp << image_data_buffer;
+        fp.close();
+        qDebug() << "Image saved to:" << local_file_path;
         return "file://" + local_file_path;
     } else {
         perror("Error opening file for writing");
-        fprintf(stderr, "download_and_save_image: Failed to open file for writing: %s\n", local_file_path.c_str());
+        qDebug() << "downloadImage: Failed to open file for writing:" << local_file_path;
         return "";
     }
 }
@@ -164,70 +123,32 @@ std::string NewsManager::downloadImage(const std::string &image_url_to_download)
 std::string NewsManager::extractImageUrl(std::string url) {
     std::string og_image_url = "";
     CURL *conn = NULL;
-    CURLcode code;
-    std::string curl_write_buffer;
+    CURLcode res;
+    std::string curl_write_buffer = "";
     char curl_error_buffer[CURL_ERROR_SIZE];
 
     conn = curl_easy_init();
     if (conn == NULL) {
-        fprintf(stderr, "extractOgImageUrl: Failed to create CURL connection\n");
+        qDebug() << "extractOgImageUrl: Failed to create CURL connection\n";
         return og_image_url;
     }
 
-    code = curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, curl_error_buffer);
-    if (code != CURLE_OK) {
-        fprintf(stderr, "extractOgImageUrl: Failed to set error buffer [%d]: %s\n", code, curl_error_buffer);
+    curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, curl_error_buffer);
+    curl_easy_setopt(conn, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(conn, CURLOPT_TIMEOUT, 3L);
+    curl_easy_setopt(conn, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0");
+    curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, writer);
+    curl_easy_setopt(conn, CURLOPT_WRITEDATA, &curl_write_buffer);
+
+    res = curl_easy_perform(conn);
+    if (res != CURLE_OK) {
+        qDebug() << "extractImageUrl: curl_easy_perform() failed:" << curl_easy_strerror(res);
         curl_easy_cleanup(conn);
         return og_image_url;
     }
+    curl_easy_cleanup(conn);
 
-    code = curl_easy_setopt(conn, CURLOPT_URL, url.c_str());
-    if (code != CURLE_OK) {
-        fprintf(stderr, "extractOgImageUrl: Failed to set URL [%s]\n", curl_error_buffer);
-        curl_easy_cleanup(conn);
-        return og_image_url;
-    }
-
-    code = curl_easy_setopt(conn, CURLOPT_TIMEOUT, 3L);
-    if (code != CURLE_OK) {
-        fprintf(stderr, "extractOgImageUrl: Failed to set timeout option [%s]\n", curl_error_buffer);
-        curl_easy_cleanup(conn);
-        return og_image_url;
-    }
-
-    code = curl_easy_setopt(conn, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0");
-    if (code != CURLE_OK) {
-        fprintf(stderr, "extractOgImageUrl: Failed to set UserAgent [%s]\n", curl_error_buffer);
-        curl_easy_cleanup(conn);
-        return og_image_url;
-    }
-
-    code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
-    if (code != CURLE_OK) {
-        fprintf(stderr, "extractOgImageUrl: Failed to set redirect option [%s]\n", curl_error_buffer);
-        curl_easy_cleanup(conn);
-        return og_image_url;
-    }
-
-    code = curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, writer);
-    if (code != CURLE_OK) {
-        fprintf(stderr, "extractOgImageUrl: Failed to set writer [%s]\n", curl_error_buffer);
-        curl_easy_cleanup(conn);
-        return og_image_url;
-    }
-
-    curl_write_buffer.clear();
-    code = curl_easy_setopt(conn, CURLOPT_WRITEDATA, &curl_write_buffer);
-    if (code != CURLE_OK) {
-        fprintf(stderr, "extractOgImageUrl: Failed to set write data [%s]\n", curl_error_buffer);
-        curl_easy_cleanup(conn);
-        return og_image_url;
-    }
-
-    code = curl_easy_perform(conn);
-    if (code != CURLE_OK) {
-        fprintf(stderr, "extractOgImageUrl: Failed to get '%s': %s\n", url.c_str(), curl_error_buffer);
-    }
 
     static QRegularExpression re(R"(<meta(?=[^>]*property\s*=\s*"og:image")(?=[^>]*content\s*=\s*"([^"]*)\")[^>]*>)", QRegularExpression::CaseInsensitiveOption);
 
@@ -237,7 +158,6 @@ std::string NewsManager::extractImageUrl(std::string url) {
         og_image_url = i.captured(1).toStdString();
     }
 
-    curl_easy_cleanup(conn);
 
     return og_image_url;
 }
@@ -274,119 +194,109 @@ void NewsManager::parseRssItemThread(ParseItemData &itemData) {
 }
 
 
+void NewsManager::rssWork(const std::string &url) {
+    std::string urlCopy = url;
 
-std::vector<ParseItemData> NewsManager::parseRSS(std::string url) {
-    std::vector<ParseItemData> final_arr;
-    CURL *curl_handle = NULL;
-    CURLcode res;
-    std::string rss_content_buffer;
-    char curl_error_buffer_main[CURL_ERROR_SIZE];
+    QFuture future = QtConcurrent::run([this, urlCopy]() {
 
-    curl_handle = curl_easy_init();
-    if (curl_handle) {
-        curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, writer);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &rss_content_buffer);
-        curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, curl_error_buffer_main);
+        CURL *curl_handle = NULL;
+        CURLcode res;
+        std::string rss_content_buffer;
+        char curl_error_buffer_main[CURL_ERROR_SIZE];
+        std::vector<ParseItemData> itemsToProcess;
 
-        res = curl_easy_perform(curl_handle);
+        curl_handle = curl_easy_init();
+        if (curl_handle) {
+            curl_easy_setopt(curl_handle, CURLOPT_URL, urlCopy.c_str());
+            curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, writer);
+            curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &rss_content_buffer);
+            curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, curl_error_buffer_main);
+            curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 3L);
+            curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0");
 
-        if (res != CURLE_OK) {
-            fprintf(stderr, "parseRSS: curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+
+    
+            res = curl_easy_perform(curl_handle);
+    
+            if (res != CURLE_OK) {
+                qDebug() << "rssWork: curl_easy_perform() failed:" << curl_easy_strerror(res);
+                itemsToProcess.push_back(ParseItemData {curl_easy_strerror(res), "err", "err"});
+            }
+            curl_easy_cleanup(curl_handle);
+        } else {
+            qDebug() << "rssWork: curl_easy_init() failed";
+            itemsToProcess.push_back(ParseItemData {"curl_easy_init() failed", "err", "err"});
         }
-        curl_easy_cleanup(curl_handle);
-    } else {
-        fprintf(stderr, "parseRSS: curl_easy_init() failed\n");
-    }
-
-    if (rss_content_buffer.empty()) {
-        fprintf(stderr, "parseRSS: Failed to retrieve RSS content or content is empty.\n");
-        return final_arr;
-    }
 
 
-    std::vector<ParseItemData> itemsToProcess;
+        if (!rss_content_buffer.empty()) {
+    
 
-    QXmlStreamReader xml(QString::fromStdString(rss_content_buffer));
+            QXmlStreamReader xml(QString::fromStdString(rss_content_buffer));
 
-    if (xml.readNextStartElement()) {
-        if (xml.name() == "rss") {
-            while (xml.readNextStartElement()) {
-                if (xml.name() == "channel") {
+            if (xml.readNextStartElement()) {
+                if (xml.name() == "rss") {
                     while (xml.readNextStartElement()) {
-                        if (xml.name() == "item") {
-                            ParseItemData item;
+                        if (xml.name() == "channel") {
                             while (xml.readNextStartElement()) {
-                                if (xml.name() == "title") {
-                                    item.title = xml.readElementText().toStdString();
-                                } else if (xml.name() == "link") {
-                                    item.link = xml.readElementText().toStdString();
-                                } else if (xml.name() == "enclosure") {
-                                    if (xml.attributes().hasAttribute("url") && xml.attributes().hasAttribute("type")) {
-                                        QString type = xml.attributes().value("type").toString();
-                                        if (type.startsWith("image/", Qt::CaseInsensitive)) {
-                                            item.imageUrl = xml.attributes().value("url").toString().toStdString();
+                                if (xml.name() == "item") {
+                                    ParseItemData item;
+                                    while (xml.readNextStartElement()) {
+                                        if (xml.name() == "title") {
+                                            item.title = xml.readElementText().toStdString();
+                                        } else if (xml.name() == "link") {
+                                            item.link = xml.readElementText().toStdString();
+                                        } else if (xml.name() == "enclosure") {
+                                            if (xml.attributes().hasAttribute("url") && xml.attributes().hasAttribute("type")) {
+                                                QString type = xml.attributes().value("type").toString();
+                                                if (type.startsWith("image/", Qt::CaseInsensitive)) {
+                                                    item.imageUrl = xml.attributes().value("url").toString().toStdString();
+                                                }
+                                            }
+                                            xml.skipCurrentElement();
+                                        } else {
+                                            xml.skipCurrentElement();
                                         }
                                     }
-                                    xml.skipCurrentElement();
+                                    if (!item.link.empty()) {
+                                        itemsToProcess.push_back(item);
+                                    }
                                 } else {
                                     xml.skipCurrentElement();
                                 }
-                            }
-                            if (!item.link.empty()) {
-                                itemsToProcess.push_back(item);
                             }
                         } else {
                             xml.skipCurrentElement();
                         }
                     }
                 } else {
-                    xml.skipCurrentElement();
+                    qWarning() << "Root element is not 'rss'. Attempting to parse as RSS anyway.";
                 }
             }
-        } else {
-            qWarning() << "Root element is not 'rss'. Attempting to parse as RSS anyway.";
+
+            if (xml.error() && xml.error() != QXmlStreamReader::PrematureEndOfDocumentError) {
+                qCritical() << "XML parsing error:" << xml.errorString();
+            }
+
+            std::vector<std::thread> threads;
+            threads.reserve(itemsToProcess.size());
+
+            for (ParseItemData &item : itemsToProcess) {
+                std::thread thread(parseRssItemThread, std::ref(item));
+                threads.push_back(std::move(thread));
+
+            }
+            for (std::thread &th : threads) {
+                th.join();
+            }
         }
-    }
-
-    if (xml.error() && xml.error() != QXmlStreamReader::PrematureEndOfDocumentError) {
-        qCritical() << "XML parsing error:" << xml.errorString();
-    }
-
-    std::vector<std::thread> threads;
-    threads.reserve(itemsToProcess.size());
-
-    for (ParseItemData &item : itemsToProcess) {
-        std::thread thread(parseRssItemThread, std::ref(item));
-        threads.push_back(std::move(thread));
-
-    }
-    for (std::thread &th : threads) {
-        th.join();
-    }
 
 
-    for (const auto& item : itemsToProcess) {
-        if (item.imageUrl != ""){
-            final_arr.push_back({item.title, item.link, item.imageUrl});
-        }
-    }
-
-    return final_arr;
-}
-
-
-
-void NewsManager::rssWork(const std::string &url) {
-    std::string urlCopy = url;
-
-    QFuture future = QtConcurrent::run([this, urlCopy]() {
-        std::vector<ParseItemData> articles = parseRSS(urlCopy);
-
-        QMetaObject::invokeMethod(this, [this, articles]() {
-            if (!articles.empty()) {
-                for (const auto& article : articles) {
+        QMetaObject::invokeMethod(this, [this, itemsToProcess]() {
+            if (!itemsToProcess.empty()) {
+                for (const auto& article : itemsToProcess) {
+                    // if (article.imageUrl != "")
                     _model->addData(VElement(QString::fromStdString(article.title), QString::fromStdString(article.imageUrl), QString::fromStdString(article.link)));
                 }
             } else {
@@ -399,34 +309,38 @@ void NewsManager::rssWork(const std::string &url) {
     });
 }
 
-void NewsManager::parseNews(const QString &url)
+void NewsManager::parseNews(const QString &url, const int index)
 {
     qDebug() << url;
-    if (url != currentURL && url != "add"){
-        loading = true;
-        emit isLoading(true);
-        currentURL = url;
-        QDir tempdir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + "pvm"));
-        if (tempdir.exists()){
-            tempdir.removeRecursively();
-            if (!tempdir.mkpath(".")){
-                qDebug() << "TMP dir creation failed.";
+    if (!loading){
+        if (url != currentURL && url != "add"){
+            currentIndex = index;
+            loading = true;
+            emit isLoading(true);
+            currentURL = url;
+            QDir tempdir(QDir::cleanPath(QDir::tempPath() + QDir::separator() + "pvm"));
+            if (tempdir.exists()){
+                tempdir.removeRecursively();
+                if (!tempdir.mkpath(".")){
+                    qDebug() << "TMP dir creation failed.";
+                }
+            } else {
+                tempdir.mkpath(".");
             }
-        } else {
-            tempdir.mkpath(".");
+            _model->clearData();
+            rssWork(url.toStdString());
+        } else if (url == "add"){
+            _model->addData(VElement(QTranslator::tr("Add channel to view news."), "", ""));
+            emit isLoading(false);
+            loading = false;
+        } else if (url == currentURL) {
+            currentIndex = index;
         }
-        _model->clearData();
-        rssWork(url.toStdString());
-    } else if (url == "add"){
-        _model->addData(VElement(QTranslator::tr("Add channel to view news."), "", ""));
-        emit isLoading(false);
-        loading = false;
     }
 }
 
 void NewsManager::addChannel(const QString &label, const QString &url)
 {
-    QSettings channels("channels.cfg", QSettings::IniFormat);
     int channels_count = channels.beginReadArray("channels");
     channels.endArray();
     channels.beginWriteArray("channels");
@@ -439,7 +353,6 @@ void NewsManager::addChannel(const QString &label, const QString &url)
 
 void NewsManager::reloadChannels()
 {
-    QSettings channels("channels.cfg", QSettings::IniFormat);
     int size = channels.beginReadArray("channels");
     _channelsList->clearData();
     for (int i = 0; i < size; ++i) {
@@ -454,13 +367,13 @@ void NewsManager::reloadChannels()
 
 QString NewsManager::parseFirst(){
     QModelIndex index = _channelsList->index(0, 0, QModelIndex());
-    parseNews(_channelsList->data(index, VListModel::LinkRole).toString());
+    parseNews(_channelsList->data(index, VListModel::LinkRole).toString(), 0);
     return _channelsList->data(index, VListModel::LabelRole).toString();
 }
 
 QString NewsManager::parseLast(){
     QModelIndex index = _channelsList->index(_channelsList->rowCount(QModelIndex()) - 2, 0, QModelIndex());
-    parseNews(_channelsList->data(index, VListModel::LinkRole).toString());
+    parseNews(_channelsList->data(index, VListModel::LinkRole).toString(), _channelsList->rowCount(QModelIndex()) - 1);
     return _channelsList->data(index, VListModel::LabelRole).toString();
 }
 
@@ -486,4 +399,38 @@ void NewsManager::reloadNews()
             _model->addData(VElement(QTranslator::tr("Add channel to view news."), "", ""));
         }
     }
+}
+
+
+QString NewsManager::removeChannel(){
+    if (currentURL != "add"){
+        int size = channels.beginReadArray("channels");
+        std::vector<QString> channelsLabels;
+        std::vector<QString> channelsURLs;
+        for (int i = 0; i < size; ++i) {
+            if (i != currentIndex) {
+                channels.setArrayIndex(i);
+                channelsLabels.push_back(channels.value("label").toString());
+                channelsURLs.push_back(channels.value("url").toString());
+            }
+        }
+        channels.endArray();
+
+        channels.beginGroup("channels");
+        channels.remove("");
+        channels.endGroup();
+
+        channels.beginWriteArray("channels");
+        for (unsigned long i = 0; i < channelsLabels.size(); i++){
+            channels.setArrayIndex(i);
+            channels.setValue("label", channelsLabels.at(i));
+            channels.setValue("url", channelsURLs.at(i));
+        }
+        channels.endArray();
+        channels.sync();
+        _model->clearData();
+        reloadChannels();
+        return parseFirst();
+    }
+    return "";
 }
