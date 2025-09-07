@@ -1,30 +1,31 @@
 <RCC>
     <qresource prefix="/">
-        <file>RightPanel.qml</file>
-        <file>Main.qml</file>
         <file>resources/shop.svg</file>
         <file>resources/settings.svg</file>
         <file>resources/power.svg</file>
         <file>resources/news.svg</file>
         <file>resources/devices.svg</file>
-        <file>TabSideButton.qml</file>
-        <file>Home.qml</file>
-        <file>Shop.qml</file>
-        <file>News.qml</file>
-        <file>Devices.qml</file>
-        <file>Settings.qml</file>
-        <file>themes/qmldir</file>
-        <file>themes/Theme.qml</file>
-        <file>NewsDelegate.qml</file>
-        <file>Dialog.qml</file>
-        <file>AskDialog.qml</file>
-        <file>RoundedButton.qml</file>
-        <file>GameDelegate.qml</file>
         <file>resources/home.svg</file>
-        <file>AddChannel.qml</file>
         <file>resources/playing.svg</file>
         <file>resources/reload.svg</file>
         <file>resources/delete.svg</file>
-        <file>SettingsDelegate.qml</file>
+        <file>ui/Components/RightPanel.qml</file>
+        <file>ui/Components/GameDelegate.qml</file>
+        <file>ui/Components/NewsDelegate.qml</file>
+        <file>ui/Components/SettingsDelegate.qml</file>
+        <file>ui/Components/TabSideButton.qml</file>
+        <file>ui/Components/AskDialog.qml</file>
+        <file>ui/Components/AddChannel.qml</file>
+        <file>ui/Components/Dialog.qml</file>
+        <file>ui/Components/RoundedButton.qml</file>
+        <file>ui/Shop.qml</file>
+        <file>ui/Settings.qml</file>
+        <file>ui/News.qml</file>
+        <file>ui/Main.qml</file>
+        <file>ui/Home.qml</file>
+        <file>ui/Devices.qml</file>
+        <file>ui/Themes/qmldir</file>
+        <file>ui/Themes/Theme.qml</file>
+        <file>ui/Components/qmldir</file>
     </qresource>
 </RCC>

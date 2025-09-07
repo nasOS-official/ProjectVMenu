@@ -1,14 +1,15 @@
 import QtQuick
 import QtQuick.Controls
-import "themes"
+import Themes 1.0
 
 Button {
     property alias image: _image.source
     property alias label: _text.text
-    property string link: ""
+    property bool playing: false
+    property string executable: ""
 
     width: scaleFactor * 275
-    height: scaleFactor * 178
+    height: scaleFactor * 275
 
     Rectangle {
         color: Theme.backgroundAlt
@@ -18,7 +19,7 @@ Button {
         id: _image
         anchors.fill: parent
         sourceSize.width: 550
-        sourceSize.height: 356
+        sourceSize.height: 550
         cache: false
         fillMode: Image.PreserveAspectCrop
     }
@@ -46,6 +47,24 @@ Button {
             anchors.fill: parent
             color: "#ffffff"
             clip: true
+        }
+
+        Button {
+            id: _playing
+            visible: playing
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 13 * scaleFactor
+            icon.width: width
+            icon.height: height
+            flat: true
+            enabled: false
+            width: 30 * scaleFactor
+            height: width
+            icon.source: "qrc:/resources/playing.svg"
+            icon.color: "#ffffff"
+            icon.cache: false
+
         }
 
 

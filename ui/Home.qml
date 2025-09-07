@@ -1,5 +1,6 @@
 import QtQuick
-import "themes"
+import Themes
+import Components
 
 Item {
     id: item1

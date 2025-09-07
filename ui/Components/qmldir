@@ -1,0 +1,11 @@
+module Components
+
+AddChannel 1.0 AddChannel.qml
+AskDialog 1.0 AskDialog.qml
+Dialog 1.0 Dialog.qml
+GameDelegate 1.0 GameDelegate.qml
+NewsDelegate 1.0 NewsDelegate.qml
+RightPanel 1.0 RightPanel.qml
+RoundedButton 1.0 RoundedButton.qml
+SettingsDelegate 1.0 SettingsDelegate.qml
+TabSideButton 1.0 TabSideButton.qml

@@ -8,7 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(QML_IMPORT_PATH ${PROJECT_SOURCE_DIR})
+set(QML_IMPORT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/ui" CACHE STRING "" FORCE)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Quick LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick LinguistTools)
@@ -23,18 +23,27 @@ include_directories(${LIBCURL_INCLUDE_DIRS})
 
 set(TS_LIST translations/ProjectVMenu_ru_RU.ts translations/ProjectVMenu_en_US.ts)
 
+include_directories(
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
+)
+
+file(GLOB SRC
+        "${PROJECT_SOURCE_DIR}/include/*.h"
+		"${PROJECT_SOURCE_DIR}/include/*.hpp"
+        "${PROJECT_SOURCE_DIR}/src/*.cpp"
+		"${PROJECT_SOURCE_DIR}/src/*.c"
+        )
+
 set(PROJECT_SOURCES
-        main.cpp
+        ${PROJECT_SOURCE_DIR}/src/main.cpp
         qml.qrc
 )
 
 qt_add_executable(ProjectVMenu
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
-    vlistmodel.h vlistmodel.cpp
-    velement.h velement.cpp
-    vrunner.h vrunner.cpp
-    newsmanager.h newsmanager.cpp
+    ${SRC}
 )
 
 qt_add_translations(TARGETS ProjectVMenu TS_FILES ${TS_LIST} SOURCES ${PROJECT_SOURCES})
@@ -42,19 +51,6 @@ qt_add_translations(TARGETS ProjectVMenu TS_FILES ${TS_LIST} SOURCES ${PROJECT_S
 target_link_libraries(ProjectVMenu
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick ${LIBCURL_LIBRARIES})
 target_link_libraries(ProjectVMenu PUBLIC mimalloc)
-
-target_compile_options(ProjectVMenu PRIVATE
-    $<$<CONFIG:Debug>:-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all
-                      -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow
-                      -fno-sanitize=null -fno-sanitize=alignment
-                      -Wall -Wextra -Wpedantic>
-    $<$<CONFIG:Release>:-Wall -Wextra -Wpedantic -Os -flto -fno-asynchronous-unwind-tables
-                        -Wl,--strip-all -ffunction-sections -fdata-sections -Wl,--gc-sections -s>
-    $<$<CONFIG:MinSizeRel>:-Wall -Wextra -Wpedantic -Os -flto -fno-asynchronous-unwind-tables
-                           -Wl,--strip-all -ffunction-sections -fdata-sections -Wl,--gc-sections -s>
-)
-
-
 
 set_target_properties(ProjectVMenu PROPERTIES
     ${BUNDLE_ID_OPTION}

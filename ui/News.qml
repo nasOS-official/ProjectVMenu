@@ -1,7 +1,8 @@
 import QtQuick
 import QtQuick.Controls
-import "themes"
+import Themes
 import QtQuick.Layouts
+import Components
 
 
 
@@ -25,7 +26,7 @@ Item {
             id: button
             height: 30 * scaleFactor
             width: height
-            icon.source: "resources/reload.svg"
+            icon.source: "qrc:/resources/reload.svg"
             icon.height: 20 * scaleFactor
             icon.width: 20 * scaleFactor
             icon.color: Theme.text
@@ -42,7 +43,7 @@ Item {
         Button {
             height: 30 * scaleFactor
             width: height
-            icon.source: "resources/delete.svg"
+            icon.source: "qrc:/resources/delete.svg"
             icon.height: 20 * scaleFactor
             icon.width: 20 * scaleFactor
             icon.color: Theme.text

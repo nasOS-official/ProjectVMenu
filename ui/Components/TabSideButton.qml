@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import "themes"
+import Themes 1.0
 
 RoundButton {
     id: root

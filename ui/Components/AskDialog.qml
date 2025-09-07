@@ -1,5 +1,5 @@
 import QtQuick
-import "themes"
+import Themes 1.0
 import QtQuick.Controls
 import QtQuick.Layouts
 

@@ -55,9 +55,8 @@ int main(int argc, char *argv[])
         }
     }
 
-
     QQmlApplicationEngine engine;
-    engine.addImportPath("qrc:/");
+    engine.addImportPath("qrc:/ui/");
 
 
     VListModel channelsModel;
@@ -65,8 +64,7 @@ int main(int argc, char *argv[])
     VListModel newsModel;
     NewsManager newsm(newsModel, channelsModel);
     VRunner vrunner(appsModel);
-
-    const QUrl url(QStringLiteral("qrc:/Main.qml"));
+    const QUrl url(QStringLiteral("qrc:/ui/Main.qml"));
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreated,
@@ -82,18 +80,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("channelsModel", &channelsModel);
     engine.rootContext()->setContextProperty("appsModel", &appsModel);
     engine.rootContext()->setContextProperty("newsModel", &newsModel);
-
-
     engine.load(url);
-
-    // if (!engine.rootObjects().isEmpty()) {
-    // QQuickWindow *win = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
-    // if (win) {
-    //     // win->setPersistentGraphics(false);
-    //     // win->setPersistentSceneGraph(false);
-
-    // }
-    // }
 
     return app.exec();
 }

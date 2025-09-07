@@ -1,10 +1,11 @@
 import QtQuick
 import QtCore
-import "themes"
+import Themes
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQml.Models
 import QtQuick.Window
+import Components
 
 Item {
 

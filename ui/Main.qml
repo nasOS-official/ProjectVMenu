@@ -2,7 +2,8 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
-import "themes"
+import Themes
+import Components
 
 Window {
     id: window
@@ -42,7 +43,7 @@ Window {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        initialItem: "qrc:/Home.qml"
+        initialItem: "qrc:/ui/Home.qml"
 
         replaceEnter: Transition {
             PropertyAnimation {
