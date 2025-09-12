@@ -34,7 +34,7 @@ private:
     // static QRegularExpression re;
     static size_t writer(char *data, size_t size, size_t nmemb, void *userp);
 
-    static std::string generateFilename(const std::string& original_url);
+    static std::string generateFilename();
 
     static std::string downloadImage(const std::string& image_url_to_download);
 

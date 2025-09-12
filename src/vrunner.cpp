@@ -30,10 +30,23 @@ void VRunner::handlerStateChanged(QProcess::ProcessState state)
 
 
 void VRunner::start(const QString &execs, int index)
-{
-    if (process.processId() == 0) {
+{   
+    auto args = execs.split(u' ', Qt::SkipEmptyParts);
+    if (args.contains("%b"))
+        args.remove(args.indexOf("%b"));
+
+    if (args.contains("%B"))
+        args.remove(args.indexOf("%B"));
+
+    if (args.contains("%f"))
+        args.remove(args.indexOf("%f"));
+
+    if (args.contains("%F"))
+        args.remove(args.indexOf("%F"));
+
+    if (process.processId() == 0 && !args.isEmpty()) {
         _currentIndex = index;
-        process.start(execs);
+        process.start(args.takeFirst(), args);
     }
 }
 
@@ -63,7 +76,6 @@ void VRunner::startRequest(const QString &execs, int index)
 
 void VRunner::acceptStartRequest()
 {
-    qDebug() << "starting...";
     start(_requestExec, _requestIndex);
 }
 
@@ -73,61 +85,66 @@ bool VRunner::isRunning() const
 }
 
 void VRunner::scanApps() {
-    QDir applicationsDir("/usr/share/applications/");
-    if (!applicationsDir.exists()) {
-        qWarning() << "Directory /usr/share/applications/ does not exist.";
-        return;
-    }
+    auto dirs = qEnvironmentVariable("XDG_DATA_DIRS").split(u':', Qt::SkipEmptyParts);
 
-    QStringList filters;
-    filters << "*.desktop";
-    QFileInfoList desktopFiles = applicationsDir.entryInfoList(filters, QDir::Files | QDir::Readable);
+    for(auto& dir: dirs){
+        dir.append("/applications");
+        QDir applicationsDir(dir);
+        if (!applicationsDir.exists()) {
+            qWarning() << "Directory" << applicationsDir.path() << "does not exist.";
+        } else {
 
-    for (const QFileInfo& fileInfo : std::as_const(desktopFiles)) {
-        QFile file(fileInfo.absoluteFilePath());
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qWarning() << "Could not open file for reading:" << fileInfo.absoluteFilePath();
-            continue;
-        }
+            QStringList filters;
+            filters << "*.desktop";
+            QFileInfoList desktopFiles = applicationsDir.entryInfoList(filters, QDir::Files | QDir::Readable);
 
-        QTextStream in(&file);
-        QString name;
-        QString execute;
-        QString tryexecute;
-        QString icon;
-        QString currentSection;
-        bool desktopEntryFound = false;
-
-        while (!in.atEnd()) {
-            QString line = in.readLine().trimmed();
-
-            if (line.startsWith("[")) {
-                currentSection = line;
-                if (currentSection == "[Desktop Entry]") {
-                    desktopEntryFound = true;
+            for (const QFileInfo& fileInfo : std::as_const(desktopFiles)) {
+                QFile file(fileInfo.absoluteFilePath());
+                if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                    qWarning() << "Could not open file for reading:" << fileInfo.absoluteFilePath();
+                    continue;
                 }
-            } else if (desktopEntryFound && currentSection == "[Desktop Entry]") {
-                int equalsIndex = line.indexOf('=');
-                if (equalsIndex > 0) {
-                    QString key = line.left(equalsIndex);
-                    QString value = line.mid(equalsIndex + 1);
 
-                    if (key == "Name") {
-                        name = value;
-                    } else if (key == "Exec") {
-                        execute = value;
-                    } else if (key == "TryExec") {
-                        tryexecute = value;
-                    } else if (key == "Icon") {
-                        icon = value;
+                QTextStream in(&file);
+                QString name;
+                QString execute;
+                QString tryexecute;
+                QString icon;
+                QString currentSection;
+                bool desktopEntryFound = false;
+
+                while (!in.atEnd()) {
+                    QString line = in.readLine().trimmed();
+
+                    if (line.startsWith("[")) {
+                        currentSection = line;
+                        if (currentSection == "[Desktop Entry]") {
+                            desktopEntryFound = true;
+                        }
+                    } else if (desktopEntryFound && currentSection == "[Desktop Entry]") {
+                        int equalsIndex = line.indexOf('=');
+                        if (equalsIndex > 0) {
+                            QString key = line.left(equalsIndex);
+                            QString value = line.mid(equalsIndex + 1);
+
+                            if (key == "Name") {
+                                name = value;
+                            } else if (key == "Exec") {
+                                execute = value;
+                            } else if (key == "TryExec") {
+                                tryexecute = value;
+                            } else if (key == "Icon") {
+                                icon = value;
+                            }
+                        }
                     }
                 }
-            }
-        }
-        file.close();
+                file.close();
 
-        if (desktopEntryFound) {
-            _model->addData(VElement(name, "file://" + icon, tryexecute.isEmpty() ? execute : tryexecute));
+                if (desktopEntryFound) {
+                    _model->addData(VElement(name, icon, tryexecute.isEmpty() ? execute : tryexecute));
+                }
+            }
         }
     }
 }

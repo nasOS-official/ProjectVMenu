@@ -3,7 +3,8 @@ import QtQuick.Controls
 import Themes 1.0
 
 Button {
-    property alias image: _image.source
+    id: _root
+    property string image: ""
     property alias label: _text.text
     property bool playing: false
     property string executable: ""
@@ -15,16 +16,15 @@ Button {
         color: Theme.backgroundAlt
         anchors.fill: parent
     }
-    Image {
-        id: _image
-        anchors.fill: parent
-        sourceSize.width: 550
-        sourceSize.height: 550
-        cache: false
-        fillMode: Image.PreserveAspectCrop
-    }
+    icon.name: image
+    icon.source: "file://" + image
+    icon.height: _root.height
+    icon.width: _root.width
+    icon.cache: false
+
     Item{
         id: item2
+        z: parent.z + 1
         height: scaleFactor * 45
         anchors.left: parent.left
         anchors.right: parent.right

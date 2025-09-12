@@ -27,5 +27,6 @@
         <file>ui/Themes/qmldir</file>
         <file>ui/Themes/Theme.qml</file>
         <file>ui/Components/qmldir</file>
+        <file>resources/close.svg</file>
     </qresource>
 </RCC>

@@ -1,19 +1,47 @@
 import QtQuick
 import Themes
 import Components
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 2.15
 
 Item {
     id: item1
 
-    Text {
-        text: qsTr("Home")
+
+    RowLayout {
+        id: row
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.leftMargin: 16 * scaleFactor
         anchors.topMargin: 49 * scaleFactor
-        font.pixelSize: 32 * scaleFactor
-        color: Theme.text
+        spacing: 8 * scaleFactor
+
+
+        Text {
+            text: qsTr("Home")
+            font.pixelSize: 32 * scaleFactor
+            color: Theme.text
+        }
+
+        Button {
+            height: 30 * scaleFactor
+            width: height
+            icon.source: "qrc:/resources/close.svg"
+            icon.height: 20 * scaleFactor
+            icon.width: 20 * scaleFactor
+            icon.color: Theme.text
+
+            background: Rectangle {
+                radius: parent.height / 2
+                color: parent.pressed ? Theme.buttonPressed : parent.hovered ? Theme.buttonHovered : Theme.background
+            }
+
+            onClicked: {
+                _vrunner.terminate();
+            }
+        }
     }
+
     GridView {
         id: listView
         anchors.fill: parent
